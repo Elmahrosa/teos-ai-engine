@@ -14,4 +14,7 @@ users.json.bak
 .vscode/
 *.swp
 *.swo
+*.backup*
+*.tmp
+tsconfig.tsbuildinfo
 .vercel
