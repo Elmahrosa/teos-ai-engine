@@ -7,46 +7,44 @@ const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://ai.teosegypt.com";
 
 export const metadata: Metadata = {
   title: {
-    default: "Teos AI Engine — Egypt's Sovereign AI Content Engine",
-    template: "%s | Teos AI Engine",
+    default: "Ask-Teos-AI Engine | Secure AI. Official Sources. Competitive Edge.",
+    template: "%s | Ask-Teos-AI Engine",
   },
   description:
-    "Generate on-brand social content across X, LinkedIn, Instagram & more with Egypt's first sovereign AI content engine. Built in Alexandria.",
+    "Secure AI content engine with official sources and competitive edge. Built for sovereign enterprises.",
   keywords: [
-    "AI content generation",
-    "social media AI",
-    "Egyptian AI",
+    "Secure AI",
+    "official sources",
+    "competitive intelligence",
     "sovereign AI",
     "content engine",
-    "Teos",
-    "AI marketing",
-    "X posts",
-    "LinkedIn content",
-    "Instagram AI",
+    "Ask-Teos-AI",
+    "enterprise AI",
+    "AI governance",
   ],
   metadataBase: new URL(siteUrl),
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "Teos AI Engine",
-    title: "Teos AI Engine — Egypt's Sovereign AI Content Engine",
+    siteName: "Ask-Teos-AI Engine",
+    title: "Ask-Teos-AI Engine | Secure AI. Official Sources. Competitive Edge.",
     description:
-      "Generate on-brand social content across X, LinkedIn, Instagram & more with Egypt's first sovereign AI content engine.",
+      "Secure AI content engine with official sources and competitive edge. Built for sovereign enterprises.",
     url: siteUrl,
     images: [
       {
         url: `${siteUrl}/og-image.svg`,
         width: 1200,
         height: 630,
-        alt: "Teos AI Engine — Sovereign AI Content Engine",
+        alt: "Ask-Teos-AI Engine | Secure AI",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Teos AI Engine — Egypt's Sovereign AI Content Engine",
+    title: "Ask-Teos-AI Engine | Secure AI. Official Sources. Competitive Edge.",
     description:
-      "Generate on-brand social content across X, LinkedIn, Instagram & more with Egypt's first sovereign AI content engine.",
+      "Secure AI content engine with official sources and competitive edge. Built for sovereign enterprises.",
     images: [`${siteUrl}/og-image.svg`],
     creator: "@king_teos",
   },
@@ -69,9 +67,9 @@ export const metadata: Metadata = {
     "application/ld+json": JSON.stringify({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      name: "Teos AI Engine",
+      name: "Ask-Teos-AI Engine",
       description:
-        "Egypt's first sovereign AI content engine for social media. Generate on-brand posts across X, LinkedIn, Instagram, and more.",
+        "Secure AI content engine with official sources and competitive edge. Built for sovereign enterprises.",
       url: siteUrl,
       applicationCategory: "AI Application",
       operatingSystem: "Web",
