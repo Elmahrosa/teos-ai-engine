@@ -1,5 +1,0 @@
-fastapi==0.110.0
-uvicorn[standard]==0.30.0
-python-multipart==0.0.9
-# Add any other dependencies for video generation here
-# For example: moviepy, boto3, etc.
