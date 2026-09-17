@@ -20,6 +20,7 @@ export default withAuth(
         publicRoutes.some((r) => pathname.startsWith(r)) ||
         authRoutes.some((r) => pathname.startsWith(r)) ||
         pathname.startsWith("/api/health") ||
+        pathname.startsWith("/api/chat") ||
         pathname.startsWith("/reset-password")
       ) {
         return addSecurityHeaders(NextResponse.next(), requestId);
@@ -49,8 +50,9 @@ export default withAuth(
         const pathname = req.nextUrl.pathname;
 
         if (
-          pathname.startsWith("/api/auth") ||
-          pathname.startsWith("/api/health") ||
+pathname.startsWith("/api/auth") ||
+        pathname.startsWith("/api/chat") ||
+        pathname.startsWith("/api/health") ||
           pathname.startsWith("/api/payment") ||
           pathname.startsWith("/_next") ||
           pathname === "/" ||

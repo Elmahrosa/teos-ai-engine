@@ -49,7 +49,7 @@ export default function Home() {
         setMessages(prev => [...prev, videoMessage]);
       } else {
         // Call existing generate endpoint (text/search)
-        const res = await fetch("/api/generate", {
+        const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prompt: userMessage, platform: "linkedin" }),
