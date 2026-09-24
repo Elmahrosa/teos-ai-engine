@@ -10,8 +10,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.64",
-    "@ai-sdk/google": "^3.0.75",
+    "@ai-sdk/anthropic": "^3.0.122",
+    "@ai-sdk/google": "^3.0.127",
     "@anthropic-ai/sdk": "^0.27.0",
     "@auth/prisma-adapter": "^2.11.1",
     "@neondatabase/serverless": "^1.1.0",
@@ -19,7 +19,7 @@
     "@prisma/client": "^7.7.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
-    "ai": "^6.0.142",
+    "ai": "^6.0.291",
     "autoprefixer": "^10.4.17",
     "bcryptjs": "^3.0.3",
     "date-fns": "^3.6.0",
