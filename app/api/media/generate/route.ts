@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPlan } from "@/lib/plans";
+import { isAdminEmail } from "@/lib/access";
 import { mediaGenerateSchema } from "@/lib/validation";
 
 export async function POST(req: Request) {
@@ -18,7 +19,10 @@ export async function POST(req: Request) {
     }
 
     const plan = getPlan(user.plan, user.email);
-    if (user.email !== "aams1969@gmail.com" && user.email !== "ayman@teosegypt.com" && plan.id === "free") {
+    // Admins bypass the paid-tier gate via ADMIN_EMAILS, matching every other
+    // privileged route (/api/admin, /api/audit, /api/admin/lifetime). This
+    // previously hardcoded two personal email addresses here.
+    if (!isAdminEmail(user.email) && plan.id === "free") {
       return NextResponse.json({ error: "Media Synthesis requires a paid tier." }, { status: 403 });
     }
 

@@ -6,14 +6,14 @@ import { PLANS, getPlan } from "@/lib/plans";
 import Link from "next/link";
 
 type Platform = "x" | "facebook" | "instagram" | "linkedin";
-type PostStatus = "draft" | "published";
 
 interface Post {
   id: string;
   platform: Platform;
-  prompt: string;
+  // The Prisma model declares prompt as nullable, so this is null for posts
+  // saved without one. There is no status field on the model or the API.
+  prompt: string | null;
   content: string;
-  status: PostStatus;
   createdAt: string;
 }
 
