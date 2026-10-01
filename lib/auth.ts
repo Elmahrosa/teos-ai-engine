@@ -28,17 +28,15 @@ export async function authorizeCredentials(credentials: any) {
     let user = await prisma.user.findUnique({ where: { email } });
 
      if (user) {
-       if (user.passwordHash) {
-         const valid = await verifyPassword(password, user.passwordHash);
-         if (!valid) return null;
-       } else if (!password) {
-         return null;
-       } else {
-         user = await prisma.user.update({
-           where: { email },
-           data: { passwordHash: await hashPassword(password) },
-         });
-       }
+       // Accounts created through OAuth (Google/Twitter/LinkedIn/Azure) have a
+       // null passwordHash. Never adopt an arbitrary password for them here:
+       // doing so would let anyone who knows an OAuth user's email log in as
+       // that user and permanently claim the account. Setting a password must
+       // go through an explicitly verified flow (e.g. a confirmed email
+       // password-reset), never through an unauthenticated sign-in attempt.
+       if (!user.passwordHash) return null;
+       const valid = await verifyPassword(password, user.passwordHash);
+       if (!valid) return null;
      } else {
       if (!password) return null;
       user = await prisma.user.create({

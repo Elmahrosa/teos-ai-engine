@@ -128,12 +128,12 @@ describe('lib/auth.ts - authorizeCredentials', () => {
       expect(mockedCreateAuditLog).not.toHaveBeenCalled();
     });
 
-    it('should update password hash and return user if password provided', async () => {
+    it('should reject login and never set a password hash if a password is provided', async () => {
+      // Regression test: an OAuth-created account (null passwordHash) must
+      // never have a caller-supplied password adopted for it, otherwise anyone
+      // knowing the victim's email could take over the account.
       const userWithoutHash = { ...mockUser, passwordHash: null };
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(userWithoutHash);
-      mockedHashPassword.mockResolvedValue('$2a$10$newhashedpassword');
-      const updatedUser = { ...mockUser, passwordHash: '$2a$10$newhashedpassword' };
-      (prisma.user.update as jest.Mock).mockResolvedValue(updatedUser);
 
       const result = await authorizeCredentials({
         email: mockEmail,
@@ -141,30 +141,11 @@ describe('lib/auth.ts - authorizeCredentials', () => {
         name: mockName,
       });
 
-      expect(result).toEqual({
-        id: mockUserId,
-        email: mockEmail,
-        name: mockName,
-        role: 'user',
-        plan: 'free',
-        trialEndsAt: null,
-        isAdmin: false,
-      });
+      expect(result).toBeNull();
       expect(prisma.user.findUnique).toHaveBeenCalledWith({ where: { email: mockEmail } });
-      expect(mockedHashPassword).toHaveBeenCalledWith(mockPassword);
-      expect(prisma.user.update).toHaveBeenCalledTimes(2); // one for passwordHash, one for lastActiveAt
-      expect(prisma.user.update).toHaveBeenNthCalledWith(1, {
-        where: { email: mockEmail },
-        data: { passwordHash: '$2a$10$newhashedpassword' },
-      });
-      expect(prisma.user.update).toHaveBeenNthCalledWith(2, {
-        where: { id: mockUserId },
-        data: { lastActiveAt: expect.any(Date) },
-      });
-      expect(mockedCreateAuditLog).toHaveBeenCalledWith(mockUserId, 'login', {
-        email: mockEmail,
-        method: 'credentials',
-      });
+      expect(mockedHashPassword).not.toHaveBeenCalled();
+      expect(prisma.user.update).not.toHaveBeenCalled();
+      expect(mockedCreateAuditLog).not.toHaveBeenCalled();
     });
   });
 
