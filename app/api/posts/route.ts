@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { createPostSchema } from "@/lib/validation";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -21,10 +22,12 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { platform, prompt, content } = await req.json();
-  if (!platform || !content) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+  const parsed = createPostSchema.safeParse(await req.json());
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid request data" }, { status: 400 });
   }
+
+  const { platform, prompt, content } = parsed.data;
   const post = await prisma.post.create({
     data: { platform, prompt, content, userId: session.user.id },
   });

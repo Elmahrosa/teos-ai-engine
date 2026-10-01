@@ -1,6 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./prisma";
+import { randomBytes } from "crypto";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import TwitterProvider from "next-auth/providers/twitter";
@@ -11,10 +12,25 @@ import { createAuditLog } from "@/lib/session";
 
 const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
 
-function makeid(): string {
-  return Array.from({ length: 32 }, () =>
-    Math.random().toString(36)[2]
-  ).join("");
+if (!secret) {
+  // Development convenience only. In production this means sessions are
+  // invalidated on every restart and diverge across instances, because the
+  // fallback is regenerated per process. Set AUTH_SECRET (or NEXTAUTH_SECRET)
+  // to a 32+ byte random value. We deliberately do not throw here: `next build`
+  // evaluates this module with NODE_ENV=production, so throwing would fail the
+  // build rather than surface the misconfiguration.
+  console.warn(
+    "[auth] AUTH_SECRET / NEXTAUTH_SECRET is not set. Falling back to a " +
+      "random per-process secret; sessions will not survive a restart or " +
+      "work across multiple instances. Set AUTH_SECRET in production."
+  );
+}
+
+// Cryptographically strong fallback. The previous implementation built the
+// secret from Math.random(), which is not a CSPRNG and made the value
+// guessable rather than merely ephemeral.
+function makeSecret(): string {
+  return randomBytes(32).toString("hex");
 }
 
 // Extracted authorize function for testability
@@ -72,7 +88,7 @@ export async function authorizeCredentials(credentials: any) {
 }
 
 export const authOptions: NextAuthOptions = {
-  secret: secret || makeid(),
+  secret: secret || makeSecret(),
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt", maxAge: 60 * 60 },
   providers: [

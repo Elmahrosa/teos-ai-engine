@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPlan } from "@/lib/plans";
+import { mediaGenerateSchema } from "@/lib/validation";
 
 export async function POST(req: Request) {
   try {
@@ -21,11 +22,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Media Synthesis requires a paid tier." }, { status: 403 });
     }
 
-    const body = await req.json();
-    const { type, prompt, stylePreset, anchorWeight, keepShapeWeight, sourceAssetUrl } = body;
-    if (!prompt) {
-      return NextResponse.json({ error: "Prompt is empty" }, { status: 400 });
+    const parsed = mediaGenerateSchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid request data" }, { status: 400 });
     }
+
+    const { type, prompt, stylePreset, anchorWeight, keepShapeWeight, sourceAssetUrl } = parsed.data;
 
     const mediaJob = await prisma.mediaJob.create({
       data: {

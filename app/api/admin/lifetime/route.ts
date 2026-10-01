@@ -3,6 +3,7 @@ import { TransactionGateway, TransactionStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSessionEmail } from "@/lib/session";
 import { isAdminEmail } from "@/lib/access";
+import { adminLifetimeSchema } from "@/lib/validation";
 
 export async function POST(req: Request) {
   const actorEmail = await getSessionEmail();
@@ -10,12 +11,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
-  const body = await req.json();
-  const email = String(body?.email || "").trim().toLowerCase();
-
-  if (!email) {
-    return NextResponse.json({ error: "Email is required" }, { status: 400 });
+  const parsed = adminLifetimeSchema.safeParse(await req.json());
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid request data" }, { status: 400 });
   }
+
+  const { email } = parsed.data;
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/access";
 import { listUsers, updateUserByEmail } from "@/lib/db";
 import { withRateLimit } from "@/lib/rate-limit";
+import { adminUserUpdateSchema } from "@/lib/validation";
 
 export async function GET(req: NextRequest) {
   return withRateLimit(req, "strict", async () => {
@@ -37,11 +38,12 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { email, plan, status } = await req.json();
-
-    if (!email) {
-      return NextResponse.json({ error: "Email required" }, { status: 400 });
+    const parsed = adminUserUpdateSchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid request data" }, { status: 400 });
     }
+
+    const { email, plan, status } = parsed.data;
 
     const updated = await updateUserByEmail(email, {
       ...(plan ? { plan } : {}),

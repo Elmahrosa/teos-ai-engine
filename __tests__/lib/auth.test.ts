@@ -1,4 +1,4 @@
-import { authorizeCredentials } from '@/lib/auth';
+import { authorizeCredentials, authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, verifyPassword } from '@/lib/password';
 import { createAuditLog } from '@/lib/session';
@@ -218,6 +218,15 @@ describe('lib/auth.ts - authorizeCredentials', () => {
 
       expect(result).toBeNull();
       expect(prisma.user.findUnique).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('authOptions secret', () => {
+    // The fallback secret used to be built from Math.random(), which is not a
+    // CSPRNG. Pin it to 32 bytes of hex so that regression fails here.
+    it('should use a configured secret when one is present', () => {
+      expect(typeof authOptions.secret).toBe('string');
+      expect((authOptions.secret as string).length).toBeGreaterThanOrEqual(32);
     });
   });
 
