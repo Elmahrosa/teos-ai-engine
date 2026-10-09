@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (process.env.NODE_ENV === "production") {
-      console.log(JSON.stringify(entry));
+      console.log(JSON.stringify(entry)); // eslint-disable-line no-console
     }
 
     return NextResponse.json({ success: true, requestId });

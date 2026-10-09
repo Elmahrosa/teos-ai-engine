@@ -21,7 +21,7 @@ export default function PricingPage() {
       <section className="section-container py-16">
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold mb-4">Choose your plan</h1>
-          <p className="text-[#8a88a0] max-w-md mx-auto">Start free. Upgrade when you're ready to scale your content engine.</p>
+          <p className="text-[#8a88a0] max-w-md mx-auto">Start free. Upgrade when you&apos;re ready to scale your content engine.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">

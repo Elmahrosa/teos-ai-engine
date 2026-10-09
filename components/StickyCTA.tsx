@@ -13,39 +13,42 @@ export default function StickyCTA({
   seatsTotal = 50,
 }: StickyCTAProps) {
   const [visible, setVisible] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return sessionStorage.getItem("sticky_dismissed") ? true : false;
+  });
   const pricingRef = useRef<Element | null>(null);
 
   useEffect(() => {
+    if (dismissed) {
+      return;
+    }
     if (typeof window !== "undefined") {
-      const d = sessionStorage.getItem("sticky_dismissed");
-      if (d) { setDismissed(true); return; }
+      const showTimer = setTimeout(() => setVisible(true), 3000);
+
+      const pricingEl = document.getElementById("pricing");
+      if (pricingEl) pricingRef.current = pricingEl;
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          setVisible(!entry.isIntersecting);
+        },
+        { threshold: 0.15 }
+      );
+      if (pricingRef.current) observer.observe(pricingRef.current);
+
+      function onScroll() {
+        if (window.scrollY < 300) setVisible(false);
+        else if (!dismissed) setVisible(true);
+      }
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+      return () => {
+        clearTimeout(showTimer);
+        observer.disconnect();
+        window.removeEventListener("scroll", onScroll);
+      };
     }
-
-    const showTimer = setTimeout(() => setVisible(true), 3000);
-
-    const pricingEl = document.getElementById("pricing");
-    if (pricingEl) pricingRef.current = pricingEl;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setVisible(!entry.isIntersecting);
-      },
-      { threshold: 0.15 }
-    );
-    if (pricingRef.current) observer.observe(pricingRef.current);
-
-    function onScroll() {
-      if (window.scrollY < 300) setVisible(false);
-      else if (!dismissed) setVisible(true);
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    return () => {
-      clearTimeout(showTimer);
-      observer.disconnect();
-      window.removeEventListener("scroll", onScroll);
-    };
   }, [dismissed]);
 
   function dismiss() {

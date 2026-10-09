@@ -14,8 +14,15 @@ export default function ExitPopup({
 }: ExitPopupProps) {
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
-  const [hasShown, setHasShown] = useState(false);
+  const [hasShown, setHasShown] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("exit_popup_shown") ? true : false;
+    }
+    return false;
+  });
   const triggered = useRef(false);
+  const mouseleaveTimeoutRef = useRef<any>(null);
+  const scrollTimeoutRef = useRef<any>(null);
   const seatsLeft = seatsTotal - seatsTaken;
   const pct = Math.round((seatsTaken / seatsTotal) * 100);
 
@@ -25,67 +32,69 @@ export default function ExitPopup({
   }, []);
 
   useEffect(() => {
+    if (hasShown) {
+      return;
+    }
     if (typeof window !== "undefined") {
-      const shown = sessionStorage.getItem("exit_popup_shown");
-      if (shown) { setHasShown(true); return; }
-    }
-
-    function onMouseLeave(e: MouseEvent) {
-      if (triggered.current) return;
-      if (e.clientY <= 10) {
-        triggered.current = true;
-        sessionStorage.setItem("exit_popup_shown", "1");
-        setHasShown(true);
-        setTimeout(() => setOpen(true), 120);
+      function onMouseLeave(e: MouseEvent) {
+        if (triggered.current) return;
+        if (e.clientY <= 10) {
+          triggered.current = true;
+          sessionStorage.setItem("exit_popup_shown", "1");
+          setHasShown(true);
+          mouseleaveTimeoutRef.current = setTimeout(() => setOpen(true), 120);
+        }
       }
-    }
 
-    function onVisibilityChange() {
-      if (triggered.current) return;
-      if (document.visibilityState === "hidden") {
-        triggered.current = true;
-        sessionStorage.setItem("exit_popup_shown", "1");
-        setHasShown(true);
+      function onVisibilityChange() {
+        if (triggered.current) return;
+        if (document.visibilityState === "hidden") {
+          triggered.current = true;
+          sessionStorage.setItem("exit_popup_shown", "1");
+          setHasShown(true);
+        }
       }
-    }
 
-    let lastY = window.scrollY;
-    let lastDir = 0;
-    let reversals = 0;
-    function onScroll() {
-      if (triggered.current) return;
-      const y = window.scrollY;
-      const dir = y < lastY ? -1 : 1;
-      if (dir !== lastDir && dir === -1) reversals++;
-      if (reversals >= 2 && window.scrollY < 300) {
-        triggered.current = true;
-        sessionStorage.setItem("exit_popup_shown", "1");
-        setHasShown(true);
-        setTimeout(() => setOpen(true), 200);
+      let lastY = window.scrollY;
+      let lastDir = 0;
+      let reversals = 0;
+      function onScroll() {
+        if (triggered.current) return;
+        const y = window.scrollY;
+        const dir = y < lastY ? -1 : 1;
+        if (dir !== lastDir && dir === -1) reversals++;
+        if (reversals >= 2 && window.scrollY < 300) {
+          triggered.current = true;
+          sessionStorage.setItem("exit_popup_shown", "1");
+          setHasShown(true);
+          scrollTimeoutRef.current = setTimeout(() => setOpen(true), 200);
+        }
+        lastY = y;
+        lastDir = dir;
       }
-      lastY = y;
-      lastDir = dir;
+
+      const arm = setTimeout(() => {
+        document.addEventListener("mouseleave", onMouseLeave);
+        document.addEventListener("visibilitychange", onVisibilityChange);
+        window.addEventListener("scroll", onScroll, { passive: true });
+      }, 8000);
+
+      function onKey(e: KeyboardEvent) {
+        if (e.key === "Escape") close();
+      }
+      document.addEventListener("keydown", onKey);
+
+      return () => {
+        clearTimeout(arm);
+        if (mouseleaveTimeoutRef.current) clearTimeout(mouseleaveTimeoutRef.current);
+        if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+        document.removeEventListener("mouseleave", onMouseLeave);
+        document.removeEventListener("visibilitychange", onVisibilityChange);
+        window.removeEventListener("scroll", onScroll);
+        document.removeEventListener("keydown", onKey);
+      };
     }
-
-    const arm = setTimeout(() => {
-      document.addEventListener("mouseleave", onMouseLeave);
-      document.addEventListener("visibilitychange", onVisibilityChange);
-      window.addEventListener("scroll", onScroll, { passive: true });
-    }, 8000);
-
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") close();
-    }
-    document.addEventListener("keydown", onKey);
-
-    return () => {
-      clearTimeout(arm);
-      document.removeEventListener("mouseleave", onMouseLeave);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-      window.removeEventListener("scroll", onScroll);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [close]);
+  }, [hasShown, close]);
 
   if (!open) return null;
 
@@ -277,7 +286,7 @@ export default function ExitPopup({
           <div className="exit-glow2" />
 
           <div className="exit-top">
-            🔥 Wait — you're about to miss this
+            🔥 Wait &mdash; you&apos;re about to miss this
           </div>
 
           <div className="exit-body">
@@ -310,7 +319,7 @@ export default function ExitPopup({
               <div className="exit-price exit-shimmer">$149</div>
               <div>
                 <div className="exit-orig">$348/yr value</div>
-                <div className="exit-onetime">one-time · forever</div>
+                <div className="exit-onetime">one-time &middot; forever</div>
               </div>
             </div>
 
@@ -341,7 +350,7 @@ export default function ExitPopup({
             </a>
 
             <button className="exit-btn-ghost" onClick={close}>
-              No thanks, I'll pay more later
+              No thanks, I&apos;ll pay more later
             </button>
 
             <p className="exit-note">

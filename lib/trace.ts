@@ -26,10 +26,10 @@ export function trace(event: TraceEvent): void {
   };
 
   if (process.env.NODE_ENV === "production") {
-    console.log(JSON.stringify(entry));
+    console.log(JSON.stringify(entry)); // eslint-disable-line no-console
   } else {
     const { requestId, event: evt, ...rest } = entry;
-    console.log(`[${requestId}] ${evt}`, rest);
+    console.log(`[${requestId}] ${evt}`, rest); // eslint-disable-line no-console
   }
 }
 

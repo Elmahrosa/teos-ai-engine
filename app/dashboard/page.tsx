@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useReducer } from "react";
 import { PLANS, getPlan } from "@/lib/plans";
 import Link from "next/link";
 
@@ -35,11 +35,27 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [postsLoading, setPostsLoading] = useState(false);
+  const postsReducer = (state, action) => {
+    switch (action.type) {
+      case 'FETCH_START':
+        return { loading: true, posts: state.posts };
+      case 'FETCH_SUCCESS':
+        return { loading: false, posts: action.payload };
+      case 'FETCH_FAILURE':
+          return { loading: false, posts: state.posts };
+      case 'RESET':
+        return { loading: false, posts: [] };
+      default:
+        return state;
+    }
+  };
+
+  const [postsState, dispatch] = useReducer(postsReducer, { loading: false, posts: [] });
   const [dailyUsed, setDailyUsed] = useState(0);
 
   const plan = getPlan(session?.user?.plan ?? "free", session?.user?.email);
+  const posts = tab === "saved" ? postsState.posts : [];
+  const loading = tab === "saved" ? postsState.loading : false;
 
   useEffect(() => {
     if (session) {
@@ -50,16 +66,36 @@ export default function DashboardPage() {
   }, [session]);
 
   const fetchPosts = useCallback(async () => {
-    setPostsLoading(true);
     const res = await fetch("/api/posts");
     const data = await res.json();
-    setPosts(data.posts ?? []);
-    setPostsLoading(false);
+    return data.posts ?? [];
   }, []);
 
+
   useEffect(() => {
-    if (tab === "saved") fetchPosts();
+    let cancelled = false;
+    if (tab === "saved") {
+      dispatch({ type: 'FETCH_START' });
+      fetchPosts().then((data) => {
+        if (!cancelled) {
+          dispatch({ type: 'FETCH_SUCCESS', payload: data });
+        }
+      }).catch(() => {
+        if (!cancelled) {
+          dispatch({ type: 'FETCH_FAILURE' });
+        }
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
   }, [tab, fetchPosts]);
+
+  useEffect(() => {
+    if (tab === "generate") {
+      dispatch({ type: 'RESET' });
+    }
+  }, [tab, dispatch]);
 
   async function handleGenerate() {
     if (!prompt.trim() || generating) return;
@@ -213,7 +249,7 @@ export default function DashboardPage() {
 
         {tab === "saved" && (
           <div className="max-w-2xl mx-auto">
-            {postsLoading ? (
+            {loading ? (
               <p className="text-center text-sm text-[#5a5870]">Loading...</p>
             ) : posts.length === 0 ? (
               <div className="text-center py-12">

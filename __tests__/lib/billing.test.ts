@@ -1,6 +1,5 @@
 import { provisionPlan, BillingError } from '@/lib/billing';
 import { prisma } from '@/lib/prisma';
-import { TransactionGateway, TransactionStatus } from '@prisma/client';
 import { generateRequestId } from '@/lib/trace';
 import { PLANS_MATRIX } from '@/lib/billing';
 
@@ -35,7 +34,7 @@ const mockedGenerateRequestId = jest.mocked(generateRequestId);
 describe('lib/billing.ts - provisionPlan', () => {
   const mockEmail = 'test@example.com';
   const mockPlanId = 'pro_monthly';
-  const mockGateway: TransactionGateway = 'DODO';
+  const mockGateway: string = 'DODO';
   const mockPaymentRef = 'pay_123';
   const mockAmountUSD = 29;
   const mockRequestId = 'req_123';
@@ -66,7 +65,7 @@ describe('lib/billing.ts - provisionPlan', () => {
         id: 'tx_123',
         userId: 'user_123',
         gateway: mockGateway,
-        status: TransactionStatus.COMPLETED,
+        status: "COMPLETED",
         planId: mockPlanId,
         amountUSD: mockAmountUSD,
         amountPi: null,
@@ -139,7 +138,7 @@ describe('lib/billing.ts - provisionPlan', () => {
         data: {
           userId: 'user_123',
           gateway: mockGateway,
-          status: TransactionStatus.COMPLETED,
+          status: "COMPLETED",
           planId: mockPlanId,
           amountUSD: mockAmountUSD,
           amountPi: null,
@@ -181,7 +180,7 @@ describe('lib/billing.ts - provisionPlan', () => {
         id: 'tx_123',
         userId: 'user_123',
         gateway: mockGateway,
-        status: TransactionStatus.COMPLETED,
+        status: "COMPLETED",
         planId: mockPlanId,
         amountUSD: mockAmountUSD,
         amountPi: null,

@@ -35,14 +35,14 @@ function setCookie(name: string, value: string) {
 }
 
 export default function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("en");
-
-  useEffect(() => {
-    const saved = getCookie(COOKIE) as Locale | null;
+  const [locale, setLocaleState] = useState<Locale>(() => {
+    if (typeof document === "undefined") return "en";
+    const saved = getCookie(COOKIE);
     if (saved === "en" || saved === "ar") {
-      setLocaleState(saved);
+      return saved;
     }
-  }, []);
+    return "en";
+  });
 
   const setLocale = useCallback((l: Locale) => {
     setLocaleState(l);

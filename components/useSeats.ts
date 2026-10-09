@@ -23,23 +23,32 @@ const FALLBACK: SeatsData = {
 export function useSeats(): SeatsData {
   const [data, setData] = useState<SeatsData>(FALLBACK);
 
-  async function fetchSeats() {
-    try {
-      const res = await fetch("/api/seats", {
-        cache: "no-store",
-      });
-      if (!res.ok) return;
-      const json = await res.json();
-      setData({ ...json, loading: false });
-    } catch {
-      setData(prev => ({ ...prev, loading: false }));
-    }
-  }
-
   useEffect(() => {
+    let cancelled = false;
+
+    async function fetchSeats() {
+      try {
+        const res = await fetch("/api/seats", {
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const json = await res.json();
+        if (!cancelled) {
+          setData({ ...json, loading: false });
+        }
+      } catch {
+        if (!cancelled) {
+          setData(prev => ({ ...prev, loading: false }));
+        }
+      }
+    }
+
     fetchSeats();
     const interval = setInterval(fetchSeats, 60_000);
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   return data;
