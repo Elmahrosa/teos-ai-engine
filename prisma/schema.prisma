@@ -164,18 +164,6 @@ model AuditLog {
 
 // ─── Billing Enums ────────────────────────────────────────────────────────────
 
-enum TransactionGateway {
-  DODO
-  PI_NETWORK
-  ADMIN
-}
-
-enum TransactionStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  REFUNDED
-}
 
 // ─── Immutable billing ledger entry per successful payment ────────────────────
 
@@ -183,8 +171,8 @@ model Transaction {
   id           String             @id @default(cuid())
   userId       String
   user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  gateway      TransactionGateway
-  status       TransactionStatus  @default(COMPLETED)
+  gateway      String
+  status       String @default("COMPLETED")
   planId       String
   amountUSD    Float              @default(0)
   amountPi     Float?

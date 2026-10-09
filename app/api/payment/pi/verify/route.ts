@@ -9,7 +9,6 @@ import { provisionPlan, BillingError } from "@/lib/billing";
 import { PAYMENT_PLANS, PI_DISCOUNT_PCT, getPlanPricePi } from "@/lib/payments";
 import { fetchPiPrice, verifyPiTransaction } from "@/lib/pi";
 import { trace, generateRequestId } from "@/lib/trace";
-import { TransactionGateway } from "@prisma/client";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -98,7 +97,7 @@ export async function POST(req: NextRequest) {
     const result = await provisionPlan({
       email,
       planId,
-      gateway: TransactionGateway.PI_NETWORK,
+      gateway: "PI_NETWORK",
       paymentRef: txid,
       amountUSD: plan.priceUSD,
       amountPi: amount,

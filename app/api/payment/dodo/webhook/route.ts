@@ -7,7 +7,6 @@ import { prisma } from "@/lib/prisma";
 import { provisionPlan, BillingError } from "@/lib/billing";
 import { isPaidPlan, getPlanPriceUSD } from "@/lib/payments";
 import { trace, generateRequestId } from "@/lib/trace";
-import { TransactionGateway } from "@prisma/client";
 import crypto from "crypto";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -154,7 +153,7 @@ export async function POST(req: NextRequest) {
     const result = await provisionPlan({
       email,
       planId,
-      gateway: TransactionGateway.DODO,
+      gateway: "DODO",
       paymentRef: paymentId,
       amountUSD,
       metadata: {

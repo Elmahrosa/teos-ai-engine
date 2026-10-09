@@ -1,6 +1,5 @@
 import { z } from "zod";
 import type { PlanId } from "@/lib/plans";
-import type { AestheticStyle } from "@prisma/client";
 
 export const emailSchema = z.string().email().trim().toLowerCase();
 
@@ -92,7 +91,7 @@ const AESTHETIC_STYLES = [
   "CYBERPUNK",
   "CINEMATIC",
   "VINTAGE_VHS",
-] as const satisfies readonly AestheticStyle[];
+] as const;
 
 export const aestheticStyleSchema = z.enum(AESTHETIC_STYLES);
 

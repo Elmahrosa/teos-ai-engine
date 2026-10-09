@@ -4,7 +4,6 @@
 // to User.plan directly from a route handler.
 
 import { prisma } from "@/lib/prisma";
-import { TransactionGateway, TransactionStatus } from "@prisma/client";
 import { trace, generateRequestId } from "@/lib/trace";
 
 // ─── Canonical plan → credit allocation matrix ────────────────────────────────
@@ -41,7 +40,7 @@ export function isLifetimePlan(planId: string): boolean {
 export interface ProvisionPlanArgs {
   email: string;
   planId: string;
-  gateway: TransactionGateway;
+  gateway: string;
   /** Unique payment reference: Dodo payment_id or Pi txid. Used for idempotency. */
   paymentRef: string;
   amountUSD: number;
@@ -127,7 +126,7 @@ export async function provisionPlan(args: ProvisionPlanArgs): Promise<ProvisionR
       data: {
         userId: user.id,
         gateway,
-        status: TransactionStatus.COMPLETED,
+        status: "COMPLETED",
         planId,
         amountUSD,
         amountPi: amountPi ?? null,

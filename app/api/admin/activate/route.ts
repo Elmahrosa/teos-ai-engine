@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { TransactionGateway, TransactionStatus } from "@prisma/client";
 import { isAdminEmail } from "@/lib/access";
 import { getSessionEmail } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
@@ -33,8 +32,8 @@ export async function POST(req: Request) {
   await prisma.transaction.create({
     data: {
       userId: user.id,
-      gateway: TransactionGateway.ADMIN,
-      status: TransactionStatus.COMPLETED,
+      gateway: "ADMIN",
+      status: "COMPLETED",
       planId: plan,
       amountUSD: 0,
       paymentRef: `admin-${email}-${Date.now()}`,
