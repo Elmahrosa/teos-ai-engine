@@ -24,6 +24,32 @@ const PLATFORM_ICONS: Record<Platform, string> = {
   linkedin: "in",
 };
 
+interface PostsState {
+  loading: boolean;
+  posts: Post[];
+}
+
+type PostsAction =
+  | { type: 'FETCH_START' }
+  | { type: 'FETCH_SUCCESS'; payload: Post[] }
+  | { type: 'FETCH_FAILURE' }
+  | { type: 'RESET' };
+
+const postsReducer = (state: PostsState, action: PostsAction): PostsState => {
+  switch (action.type) {
+    case 'FETCH_START':
+      return { loading: true, posts: state.posts };
+    case 'FETCH_SUCCESS':
+      return { loading: false, posts: action.payload };
+    case 'FETCH_FAILURE':
+      return { loading: false, posts: state.posts };
+    case 'RESET':
+      return { loading: false, posts: [] };
+    default:
+      return state;
+  }
+};
+
 export default function DashboardPage() {
   const { data: session } = useSession();
   const [tab, setTab] = useState<"generate" | "saved">("generate");
@@ -35,20 +61,6 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const postsReducer = (state, action) => {
-    switch (action.type) {
-      case 'FETCH_START':
-        return { loading: true, posts: state.posts };
-      case 'FETCH_SUCCESS':
-        return { loading: false, posts: action.payload };
-      case 'FETCH_FAILURE':
-          return { loading: false, posts: state.posts };
-      case 'RESET':
-        return { loading: false, posts: [] };
-      default:
-        return state;
-    }
-  };
 
   const [postsState, dispatch] = useReducer(postsReducer, { loading: false, posts: [] });
   const [dailyUsed, setDailyUsed] = useState(0);
