@@ -1,1 +1,3 @@
-﻿# Governance - Law Over Code
+﻿# Governance
+Governance: TEOS International Civic Model
+Decision: Steward + Community consensus.

@@ -1,4 +1,4 @@
-import { prisma } from './prisma';
+﻿import { prisma } from './prisma';
 
 export async function ensureUserExists(email: string, name?: string) {
   let user = await prisma.user.findUnique({
@@ -32,13 +32,15 @@ export async function canUserPost(userId: string, plan: string) {
     return { allowed: false, reason: "Starter limit reached. Upgrade to continue." };
   }
 
-  const today = new Date().toISOString().split('T')[0];
-  if (user.lastResetDate.toISOString().split('T')[0] !== today) {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { dailyPostsUsed: 0, lastResetDate: new Date() }
-    });
-  }
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const startOfLastReset = user.lastResetDate ? new Date(user.lastResetDate) : null;
+    if (startOfLastReset === null || startOfLastReset.getTime() !== startOfToday.getTime()) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { dailyPostsUsed: 0, lastResetDate: new Date() }
+      });
+    }
 
   const isUnlimited = UNLIMITED_PLANS.includes(p) || p.startsWith("agency_") || p === "pro_lifetime";
   const isPro = p.startsWith("pro_") && p !== "pro_lifetime";
@@ -80,3 +82,4 @@ export async function appendPost(data: { userId: string; content: string; platfo
   await recordPost(data.userId);
   return post;
 }
+

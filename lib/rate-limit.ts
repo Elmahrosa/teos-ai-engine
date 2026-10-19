@@ -1,4 +1,4 @@
-import { Ratelimit } from "@upstash/ratelimit";
+﻿import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -76,6 +76,7 @@ export async function checkRateLimit(
 ): Promise<{ allowed: boolean; remaining: number; reset: number } | null> {
   const client = getClient(policy);
   if (!client) {
+    // Warning: in-memory fallback is not suitable for production\n    // Warning: in-memory fallback is not suitable for production
     return inMemoryCheck(getClientIP(request), policy);
   }
 
@@ -131,3 +132,6 @@ export async function withRateLimit(
 
   return handler();
 }
+
+
+

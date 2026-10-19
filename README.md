@@ -1,4 +1,4 @@
-# 🏺 Teos AI Engine
+﻿# 🏺 Teos AI Engine
 
 > **Egypt's Sovereign AI Content Engine** — Generate platform-optimized social media content for X, LinkedIn, Instagram, Facebook, TikTok, Threads, and Telegram. Built in Alexandria. Powered by Elmahrosa International.
 
@@ -114,7 +114,7 @@ teos-ai-engine/
 │   └── shared/                 # Shared components
 ├── lib/
 │   ├── ai/                     # AI provider abstraction layer
-│   │   ├── client.ts           # Provider selector (Claude / OpenAI)
+│   │   ├── client.ts           # Provider selector (Claude / Gemini)
 │   │   ├── prompts.ts          # Platform-specific prompt templates
 │   │   └── rate-limit.ts       # AI request rate limiting
 │   ├── auth/                   # Auth configuration
@@ -147,7 +147,7 @@ AI Service Layer
     ├── Tone configuration
     │
     ▼
-Claude / OpenAI (with fallback)
+Claude / Gemini (with plan-based routing)
     │
     ▼
 Visibility Score → Response
@@ -169,7 +169,7 @@ Persist to DB → Return to client
 | Database | PostgreSQL (Neon) via Prisma ORM |
 | Auth | NextAuth.js v5 |
 | AI — Primary | Anthropic Claude (claude-sonnet) |
-| AI — Fallback | OpenAI GPT-4o |
+| AI — Fallback | Google Gemini (gemini-2.0-flash) |
 | Payments | Dodo Payments + USDC (Solana) + Pi Network |
 | Deployment | Vercel (edge-optimized) |
 | CI/CD | GitHub Actions |

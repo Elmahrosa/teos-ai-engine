@@ -17,7 +17,7 @@ import { trace, generateRequestId } from "@/lib/trace";
 
 const generateSchema = z.object({
   prompt: z.string().trim().min(5, "Prompt must be at least 5 characters").max(600),
-  platform: z.enum(["x", "instagram", "linkedin", "facebook", "threads", "tiktok", "youtube"]),
+  platform: z.enum(["x", "instagram", "linkedin", "facebook", "threads", "tiktok"]),
 });
 
 type Platform = z.infer<typeof generateSchema>["platform"];
@@ -30,47 +30,10 @@ const PLATFORM_CONTEXT: Record<Platform, string> = {
   linkedin:  "LinkedIn — professional thought leadership post, 150–300 words, 3–5 hashtags",
   facebook:  "Facebook — community-friendly, conversational, 100–200 words, 2–4 hashtags",
   threads:   "Threads — conversational short-form, max 500 characters, 0–2 hashtags",
-  tiktok:    "TikTok — viral hook for video caption, max 150 characters, 3–5 trending hashtags",
-  youtube:   "YouTube — SEO-friendly video description, 200–300 words, 5–8 hashtags",
+  tiktok:    "TikTok — viral hook for video caption, max 150 characters, 3–5 trending hashtags"
 };
 
-// ─── Model routing by plan tier ──────────────────────────────────────────────
-
-function resolveModel(planId: string) {
-  const isAgencyTier =
-    planId === "agency_monthly" ||
-    planId === "agency_yearly"  ||
-    planId === "agency_lifetime";
-
-  if (isAgencyTier && process.env.ANTHROPIC_API_KEY) {
-    return { model: anthropic("claude-3-5-sonnet-20241022"), provider: "claude" as const };
-  }
-  if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-    return { model: google("gemini-2.0-flash"), provider: "gemini" as const };
-  }
-  if (process.env.ANTHROPIC_API_KEY) {
-    return { model: anthropic("claude-3-5-sonnet-20241022"), provider: "claude" as const };
-  }
-  return null;
-}
-
-// ─── Response parser: extract post + hashtags from raw AI text ────────────────
-
-function parseAIResponse(raw: string): { post: string; hashtags: string[] } {
-  // Try JSON block first (wrapped in ```json ... ```)
-  const jsonBlock = raw.match(/```json\s*([\s\S]*?)```/i);
-  if (jsonBlock?.[1]) {
-    try {
-      const parsed = JSON.parse(jsonBlock[1].trim());
-      if (typeof parsed.post === "string") {
-        return {
-          post: parsed.post.trim(),
-          hashtags: Array.isArray(parsed.hashtags) ? parsed.hashtags : [],
-        };
-      }
-    } catch { /* fall through */ }
-  }
-
+function parseAIResponse(raw: string) {
   // Try raw JSON object
   const jsonRaw = raw.match(/\{[\s\S]*\}/);
   if (jsonRaw) {
@@ -221,3 +184,9 @@ Rules:
     );
   }
 }
+
+
+
+
+
+
