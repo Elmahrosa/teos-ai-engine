@@ -164,7 +164,7 @@ export default function ExitPopup({
           color: #C9A84C; text-transform: uppercase;
           margin-bottom: 20px;
         }
-        .exit-live { 
+        .exit-live {
           width: 6px; height: 6px; border-radius: 50%; background: #4ade80;
           animation: livepulse 1.5s ease infinite;
         }

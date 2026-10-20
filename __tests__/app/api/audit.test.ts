@@ -117,5 +117,5 @@ describe('app/api/audit/route.ts - GET', () => {
         error: 'Failed to fetch audit log',
       });
     });
-  });
-});
+  );
+}
