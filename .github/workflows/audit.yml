@@ -13,20 +13,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
-      - name: Fetch codex_audit.sh from audit-tools
+      - name: Fetch pinned codex_audit.sh
+        env:
+          CODEX_AUDIT_COMMIT: 35593648f445bcdf0ab716b07597006af9126fad
+          CODEX_AUDIT_SHA256: 63bdcaba4d875430232ed11318ebb53e6f57ea2b0304fd441b0bd3c6364a5471
         run: |
-          for i in 1 2 3 4 5; do
-            if curl --fail --silent --show-error --location \
-                "https://raw.githubusercontent.com/Elmahrosa/elmahrosa-org/main/audit-tools/codex_audit.sh" \
-                -o codex_audit.sh; then
-              break
-            fi
-            echo "fetch attempt $i failed, retrying..."
-            sleep 5
-          done
-          [ -s codex_audit.sh ] || { echo "codex_audit.sh fetch failed after retries" >&2; exit 1; }
+          set -euo pipefail
+          url="https://raw.githubusercontent.com/Elmahrosa/elmahrosa-org/${CODEX_AUDIT_COMMIT}/audit-tools/codex_audit.sh"
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 "$url" -o codex_audit.sh
+          echo "${CODEX_AUDIT_SHA256}  codex_audit.sh" | sha256sum --check --strict
           chmod +x codex_audit.sh
 
       - name: Run readiness audit
@@ -34,17 +33,15 @@ jobs:
 
       - name: Commit audit data
         env:
-          AUDIT_TOOLS_PAT: ${{ secrets.AUDIT_TOOLS_PAT }}
+          PUSH_TOKEN: ${{ secrets.AUDIT_TOOLS_PAT || github.token }}
         run: |
-          set -e
-          git config user.name "audit-hub-bot"
-          git config user.email "actions@github.com"
-          git add audit-data/ docs/data/
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- audit-data docs/data || true
           if git diff --cached --quiet; then
             echo "No audit data changes"
             exit 0
           fi
           git commit -m "chore: refresh audit data [skip ci]"
-          git config --unset-all http.https://github.com/.extraheader 2>/dev/null || true
-          PUSH_TOKEN="${AUDIT_TOOLS_PAT:-$GITHUB_TOKEN}"
           git push "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_REF_NAME}"
